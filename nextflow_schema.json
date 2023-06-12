@@ -60,6 +60,11 @@
                     "type": "boolean",
                     "description": "If data is single-ended PacBio reads instead of Illumina"
                 },
+                "bam": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-file-archive",
+                    "description": "If PacBio data is in bam format"
+                },
                 "iontorrent": {
                     "type": "boolean",
                     "description": "If data is single-ended IonTorrent reads instead of Illumina"

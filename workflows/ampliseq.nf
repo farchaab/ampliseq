@@ -74,6 +74,14 @@ if (params.pacbio || params.iontorrent) {
     single_end = true
 }
 
+split = null
+
+if (params.bam && single_end){
+    split = false
+} else {
+    split = true
+}
+
 trunclenf = params.trunclenf ?: 0
 trunclenr = params.trunclenr ?: 0
 if ( !single_end && !params.illumina_pe_its && (params.trunclenf == null || params.trunclenr == null) && !is_fasta_input ) {
@@ -178,6 +186,7 @@ include { QIIME2_ANCOM                  } from '../subworkflows/local/qiime2_anc
 // MODULE: Installed directly from nf-core/modules
 //
 
+include { SAMTOOLS_BAM2FQ                   } from '../modules/nf-core/samtools/bam2fq/main'
 include { CUTADAPT as CUTADAPT_TAXONOMY     } from '../modules/nf-core/cutadapt/main'
 include { FASTQC                            } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                           } from '../modules/nf-core/multiqc/main'
@@ -204,6 +213,14 @@ workflow AMPLISEQ {
     PARSE_INPUT ( params.input, is_fasta_input, single_end, params.multiple_sequencing_runs, params.extension )
     ch_reads = PARSE_INPUT.out.reads
 
+    //
+    // Convert BAM to FASTQ if input is BAM
+    //
+    if (params.bam) {
+        SAMTOOLS_BAM2FQ ( ch_reads, split )
+        ch_reads = SAMTOOLS_BAM2FQ.out.reads
+        ch_versions = ch_versions.mix(SAMTOOLS_BAM2FQ.out.versions.first())
+    }
     //
     // MODULE: Rename files
     //
